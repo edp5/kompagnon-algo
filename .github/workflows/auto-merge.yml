@@ -1,0 +1,22 @@
+name: Auto merge
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - labeled
+      - unlabeled
+      - reopened
+      - synchronize
+
+jobs:
+  auto-merge:
+    if: (contains(github.event.pull_request.labels.*.name, 'Ready to merge') && github.event.pull_request.draft == false) || (contains(github.event.pull_request.labels.*.name, 'Auto merge') && github.event.pull_request.draft == false)
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call auto merge
+        uses: edp5/edp5-actions/auto-merge@v1.2.1
+        with:
+            token: ${{ secrets.SERVICE_TOKEN }}
