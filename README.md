@@ -13,6 +13,8 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 kompagnon-algo/
 ├── .venv                # Virtual environment
 ├── .gitignore           # To ignore .venv, __pycache__, etc.
+├── configure.sh         # Script to setup the project
+├── pyproject.toml       # Project versioning
 ├── requirements.txt     # Project dependencies
 ├── main.py              # Entry point of your application/API
 ├── src/                 # Source code of the algorithm
