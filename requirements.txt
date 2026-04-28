@@ -5,3 +5,4 @@ numpy == 2.4.4            # Used for numerical operations
 pytest == 9.0.3           # Used for testing
 SQLAlchemy == 2.0.49      # Used for database operations
 fastapi == 0.128.8        # Used for API to exchange data with the main api
+uvicorn == 0.34.0         # Used as ASGI server to run FastAPI
