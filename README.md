@@ -13,7 +13,7 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 
 ```text
 kompagnon-algo/
-├── main.py                  # Project setup and automatic server launcher
+├── setup.py                 # Project setup and automatic server launcher
 ├── src/
 │   ├── api/
 │   │   ├── main.py          # FastAPI application instance & routing setup
@@ -57,7 +57,7 @@ Simply run the following command at the root of the project:
 
 ```bash
 # Automatic setup and server launch
-python3 main.py
+python3 setup.py
 ```
 
 _Note: If you prefer to launch the API manually after the environment has been created, you can use:_

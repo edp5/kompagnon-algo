@@ -1,17 +1,17 @@
 import fastapi
 import uvicorn
 
-# Initialisation de l'application FastAPI avec ses métadonnées
+# Initialize the FastAPI application with its metadata
 app = fastapi.FastAPI(
-    title="API Algo Matching Kompagnon",
-    description="API pour l'algorithme de matching",
+    title="Kompagnon Matching Algorithm API",
+    description="API for the matching algorithm",
     version="0.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# Import des routes depuis src.api.routes
+# Import routes from src.api.routes
 from src.api.routes import router as api_router
 
-# On attache le router à notre application principale
+# Attach the router to the main application
 app.include_router(api_router)
