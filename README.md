@@ -13,7 +13,9 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 
 ```text
 kompagnon-algo/
-├── setup.py                 # Project setup and automatic server launcher
+├── configure.sh             # Environment setup (venv & dependencies)
+├── start.sh                 # API launcher (Uvicorn)
+├── requirements.txt         # Project dependencies
 ├── src/
 │   ├── api/
 │   │   ├── main.py          # FastAPI application instance & routing setup
@@ -51,21 +53,24 @@ Once the server is running (see [Project Setup](#project-setup)), you can access
 
 ## Project Setup & Running the API
 
-A unified script is provided to automatically create the virtual environment, install the required dependencies, and launch the server.
+### 1. Configuration
 
-Simply run the following command at the root of the project:
+Run the setup script to create the virtual environment and install all dependencies:
 
 ```bash
-# Automatic setup and server launch
-python3 setup.py
+sh configure.sh
 ```
 
-_Note: If you prefer to launch the API manually after the environment has been created, you can use:_
+### 2. Launch the API
+
+Use the provided launch script:
 
 ```bash
-# Activate virtual environment (Mac/Linux)
-source .venv/bin/activate
+sh start.sh
+```
 
-# Run the API
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+_Note: You can also launch the API manually if the environment is already activated:_
+
+```bash
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
