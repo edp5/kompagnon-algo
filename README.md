@@ -4,48 +4,73 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 
 ## Roadmap
 
-- [ ] Setup rule set
-- [ ] Swagger for the algo API
+- [x] Setup rule set
+- [x] Swagger for the algo API
+- [x] Setup API
+- [ ] Implement algo logic
 
-## Proposed Structure
+## Proposed Architecture
 
 ```text
 kompagnon-algo/
-├── .venv                # Virtual environment
-├── .gitignore           # To ignore .venv, __pycache__, etc.
-├── configure.sh         # Script to setup the project
-├── pyproject.toml       # Project versioning
-├── requirements.txt     # Project dependencies
-├── main.py              # Entry point of your application/API
-├── src/                 # Source code of the algorithm
-│   ├── __init__.py
-│   ├── config.py        # Loading environment variables
-│   ├── db/              # Database connection code
-│   ├── models/          # Data structures
-│   ├── services/        # Business logic
-│   └── algorithm/       # The core of your system!
-│       ├── __init__.py
-│       ├── scoring.py   # Functions to calculate compatibility
-│       └── matcher.py   # System that matches users together
-└── tests/               # Test the algo
-    ├── __init__.py
-    └── test_algorithm.py
+├── configure.sh             # Environment setup (venv & dependencies)
+├── start.sh                 # API launcher (Uvicorn)
+├── requirements.txt         # Project dependencies
+├── src/
+│   ├── api/
+│   │   ├── main.py          # FastAPI application instance & routing setup
+│   │   ├── routes.py        # Routes G (Accompanist) and H (Accompanied)
+│   │   └── schema.py        # Pydantic models for API requests/responses
+│   ├── db/
+│   │   ├── session.py       # Database connection and session management
+│   │   └── models.py        # SQLAlchemy models (T1: Accompanied, T2: Accompanists, T3: FoundJourney)
+│   ├── algorithm/
+│   │   ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
+│   │   └── scoring.py       # Math/Algo logic for compatibility calculation
+│   └── config.py            # Environment variables and configuration
+├── tests/                   # Unit and integration tests
+├── requirements.txt         # Project dependencies
+└── README.md
 ```
 
-## Project Setup
+## How to access Swagger Documentation
 
-Run the following commands to set up the project:
+Once the server is running (see [Project Setup](#project-setup)), you can access the automatic interactive documentation:
+
+- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+## Workflow Description
+
+1. **Trigger**: The main API calls `kompagnon-algo` on Route **G** (Accompanist) or **H** (Accompanied) with a `journey_id` (A).
+2. **Fetch**: The algo fetches the data for journey A from **Table T1** (or T2 depending on the type).
+3. **Match**:
+   - If **Accompanied (H)**: The algo searches for candidates in **Table T2** (Accompanists).
+   - If **Accompanist (G)**: The algo searches for candidates in **Table T1** (Accompanied).
+4. **Calculations**: Scikit-learn/Pandas are used to rank candidates.
+5. **Storage**: A new entry is created in **Table T3** (`foundJourney`) linking the two journeys.
+6. **Response**: The algo returns the ID of the matched journeys from **Table T3** to the caller.
+
+## Project Setup & Running the API
+
+### 1. Configuration
+
+Run the setup script to create the virtual environment and install all dependencies:
 
 ```bash
-# Create virtual environment
-python3 -m venv .venv
+sh configure.sh
+```
 
-# Activate virtual environment
-source .venv/bin/activate
+### 2. Launch the API
 
-# Upgrade pip
-pip install --upgrade pip
+Use the provided launch script:
 
-# Install libraries
-pip install -r requirements.txt
+```bash
+sh start.sh
+```
+
+_Note: You can also launch the API manually if the environment is already activated:_
+
+```bash
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
