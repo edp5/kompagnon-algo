@@ -1,5 +1,16 @@
-# 1. We place ourselves in the right directory
-cd "$(dirname "$0")"
+#!/bin/bash
+set -e
 
-# 2. Activate API
-exec uvicorn src.api.main:app --host 0.0.0.0  --port 8000
+SCRIPT_DIR="$(dirname "$0")"
+cd "$SCRIPT_DIR" || { echo "Erreur: Impossible d'accéder au répertoire du script"; exit 1; }
+
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | grep '=' | xargs)
+fi
+
+if [ -z "$PORT" ]; then
+    echo "Error, environment is not define"
+    exit 1
+fi
+echo "Started server on port $PORT..."
+exec uvicorn src.api.main:app --host 0.0.0.0 --port "$PORT"
