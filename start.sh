@@ -5,7 +5,9 @@ SCRIPT_DIR="$(dirname "$0")"
 cd "$SCRIPT_DIR" || { echo "Erreur: Impossible d'accéder au répertoire du script"; exit 1; }
 
 if [ -f ".env" ]; then
-    export $(grep -v '^#' .env | grep '=' | xargs)
+    set -a
+    . ".env"
+    set +a
 fi
 
 if [ -z "$PORT" ]; then
