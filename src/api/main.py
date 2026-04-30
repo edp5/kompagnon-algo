@@ -1,9 +1,12 @@
 import fastapi
 import uvicorn
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize the FastAPI application with its metadata
 app = fastapi.FastAPI(
-    title="Kompagnon Matching Algorithm API",
+    title="Kompagnon - Algorithm API",
     description="API for the matching algorithm",
     version="0.0.0",
     docs_url="/docs",
