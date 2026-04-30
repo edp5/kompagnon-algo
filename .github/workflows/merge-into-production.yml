@@ -1,0 +1,37 @@
+name: merge into production
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  merge-main-into-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.SERVICE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into production
+        run: |
+          git fetch origin main production
+          git checkout -B production origin/production
+          git merge --no-edit origin/main
+
+      - name: Push changes
+        run: |
+          git push origin production
+        env:
+          GITHUB_TOKEN: ${{ secrets.SERVICE_TOKEN }}
