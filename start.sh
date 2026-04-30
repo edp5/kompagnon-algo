@@ -11,7 +11,7 @@ if [ -f ".env" ]; then
 fi
 
 if [ -z "$PORT" ]; then
-    echo "Error, environment is not define"
+    echo "Error: PORT must be set. Define PORT in the environment or add it to the .env file."
     exit 1
 fi
 echo "Started server on port $PORT..."
