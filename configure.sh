@@ -21,3 +21,9 @@ echo "Installing dependencies"
 python -m pip install -r requirements.txt
 
 echo "============================"
+
+# Copy environment variable
+echo "Copy environment variable"
+cp sample.env .env
+
+echo "End of configuration"
