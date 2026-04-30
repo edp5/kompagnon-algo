@@ -7,6 +7,7 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 - [x] Setup rule set
 - [x] Swagger for the algo API
 - [x] Setup API
+- [] Setup DB connection and create model of algo
 - [ ] Implement algo logic
 
 ## Proposed Architecture
@@ -59,6 +60,12 @@ Run the setup script to create the virtual environment and install all dependenc
 
 ```bash
 sh configure.sh
+```
+
+Start the venv:
+
+```bash
+source .venv/bin/activate
 ```
 
 ### 2. Launch the API
