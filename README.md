@@ -20,6 +20,8 @@ kompagnon-algo/
 ├── configure.sh             # Environment setup (venv & dependencies)
 ├── start.sh                 # API launcher (Uvicorn)
 ├── requirements.txt         # Project dependencies
+├── requirements-test.txt    # Testing dependencies
+├── pytest.ini               # Pytest configuration
 ├── pyproject.toml           # Project configuration
 ├── render.yaml              # Render deployment configuration
 ├── src/
@@ -39,6 +41,9 @@ kompagnon-algo/
 │       ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
 │       └── scoring.py       # Math/Algo logic for compatibility calculation
 ├── tests/                   # Unit and integration tests
+│   ├── conftest.py          # Fixtures and DB setup
+│   ├── test_routes.py       # Endpoint testing
+│   └── __init__.py
 └── README.md
 ```
 
@@ -89,3 +94,33 @@ _Note: You can also launch the API manually if the environment is already activa
 ```bash
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
+
+## Testing
+
+A professional test suite is available to ensure API reliability and data integrity.
+
+### 1. Install Test Dependencies
+
+Before running the tests, install the specific testing dependencies:
+
+```bash
+pip install -r requirements-test.txt
+```
+
+### 2. Run the Tests
+
+Execute the following command to run all tests with a verbose output:
+
+```bash
+pytest tests/ -v --tb=short
+```
+
+### 3. Test Coverage
+
+The test suite includes:
+- **FastAPI TestClient**: Full integration tests for all routes.
+- **SQLite In-Memory**: A clean, isolated database for each test session.
+- **Fixtures**: Automated setup/teardown for database tables and test data.
+- **Happy & Sad Path**: Coverage for successful requests, validation errors (422), and edge cases.
+
+The testing configuration is managed via `pytest.ini`.
