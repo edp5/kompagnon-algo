@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -59,8 +60,8 @@ def sample_companion_payload():
         "departureLat": 48.8566,
         "arrivalLon": 4.8357,
         "arrivalLat": 45.7640,
-        "departureTime": "2024-05-01T10:00:00",
-        "arrivalTime": "2024-05-01T14:00:00"
+        "departureTime": datetime(2024, 5, 1, 10, 0),
+        "arrivalTime": datetime(2024, 5, 1, 14, 0)
     }
 
 @pytest.fixture
@@ -74,6 +75,6 @@ def sample_passenger_payload():
         "departureLat": 48.8566,
         "arrivalLon": 4.8357,
         "arrivalLat": 45.7640,
-        "departureTime": "2024-05-01T10:15:00",
-        "arrivalTime": "2024-05-01T13:45:00"
+        "departureTime": datetime(2024, 5, 1, 10, 15),
+        "arrivalTime": datetime(2024, 5, 1, 13, 45)
     }
