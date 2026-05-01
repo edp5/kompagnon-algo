@@ -7,30 +7,38 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 - [x] Setup rule set
 - [x] Swagger for the algo API
 - [x] Setup API
-- [] Setup DB connection and create model of algo
+- [x] Setup DB connection
+- [x] Add tests for API & DB connection
 - [ ] Implement algo logic
 
 ## Proposed Architecture
 
 ```text
 kompagnon-algo/
+├── .env                     # Local environment variables (created from sample.env)
+├── sample.env               # Template for environment variables
 ├── configure.sh             # Environment setup (venv & dependencies)
 ├── start.sh                 # API launcher (Uvicorn)
 ├── requirements.txt         # Project dependencies
+├── pyproject.toml           # Project configuration
+├── render.yaml              # Render deployment configuration
 ├── src/
 │   ├── api/
+│   │   ├── routes/          # API endpoint routes
+│   │   │   ├── get_invalid.py
+│   │   │   ├── get_valid.py
+│   │   │   ├── put_journey.py
+│   │   │   ├── root.py
+│   │   │   └── status.py
 │   │   ├── main.py          # FastAPI application instance & routing setup
-│   │   ├── routes.py        # Routes G (Accompanist) and H (Accompanied)
 │   │   └── schema.py        # Pydantic models for API requests/responses
 │   ├── db/
 │   │   ├── session.py       # Database connection and session management
 │   │   └── models.py        # SQLAlchemy models (T1: Accompanied, T2: Accompanists, T3: FoundJourney)
-│   ├── algorithm/
-│   │   ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
-│   │   └── scoring.py       # Math/Algo logic for compatibility calculation
-│   └── config.py            # Environment variables and configuration
+│   └── algorithm/
+│       ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
+│       └── scoring.py       # Math/Algo logic for compatibility calculation
 ├── tests/                   # Unit and integration tests
-├── requirements.txt         # Project dependencies
 └── README.md
 ```
 
