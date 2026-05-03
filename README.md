@@ -112,7 +112,7 @@ pip install -r requirements-test.txt
 Execute the following command to run all tests with a verbose output:
 
 ```bash
-pytest tests/ -v --tb=short
+sh test.sh
 ```
 
 ### 3. Test Coverage
