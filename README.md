@@ -19,8 +19,7 @@ kompagnon-algo/
 ├── sample.env               # Template for environment variables
 ├── configure.sh             # Environment setup (venv & dependencies)
 ├── start.sh                 # API launcher (Uvicorn)
-├── requirements.txt         # Project dependencies
-├── requirements-test.txt    # Testing dependencies
+├── requirements.txt         # Project and testing dependencies
 ├── pytest.ini               # Pytest configuration
 ├── pyproject.toml           # Project configuration
 ├── render.yaml              # Render deployment configuration
@@ -42,7 +41,11 @@ kompagnon-algo/
 │       └── scoring.py       # Math/Algo logic for compatibility calculation
 ├── tests/                   # Unit and integration tests
 │   ├── conftest.py          # Fixtures and DB setup
-│   ├── test_routes.py       # Endpoint testing
+│   ├── test_get_invalid.py  # Tests for get-invalid route
+│   ├── test_get_valid.py    # Tests for get-valid route
+│   ├── test_put_journey.py  # Tests for put-journey route
+│   ├── test_root.py         # Tests for root route
+│   ├── test_status.py       # Tests for status route
 │   └── __init__.py
 └── README.md
 ```
@@ -99,15 +102,7 @@ uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 
 A professional test suite is available to ensure API reliability and data integrity.
 
-### 1. Install Test Dependencies
-
-Before running the tests, install the specific testing dependencies:
-
-```bash
-pip install -r requirements-test.txt
-```
-
-### 2. Run the Tests
+### 1. Run the Tests
 
 Execute the following command to run all tests with a verbose output:
 
@@ -115,7 +110,7 @@ Execute the following command to run all tests with a verbose output:
 sh test.sh
 ```
 
-### 3. Test Coverage
+### 2. Test Coverage
 
 The test suite includes:
 - **FastAPI TestClient**: Full integration tests for all routes.
