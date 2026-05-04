@@ -1,7 +1,0 @@
-pytest
-httpx
-sqlalchemy
-fastapi
-python-dotenv
-psycopg2-binary
-pytest-cov
