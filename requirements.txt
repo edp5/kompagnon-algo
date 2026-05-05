@@ -4,7 +4,7 @@ scikit-learn == 1.8.0     # Used for machine learning algorithms
 numpy == 2.4.4            # Used for numerical operations
 pytest == 9.0.3           # Used for testing
 SQLAlchemy == 2.0.49      # Used for database operations
-psycopg2-binary >= 2.9.10 # Used as Postgres driver for SQLAlchemy
+psycopg2-binary >= 2.9.12 # Used as Postgres driver for SQLAlchemy
 fastapi == 0.128.8        # Used for API to exchange data with the main api
 uvicorn == 0.34.0         # Used as ASGI server to run FastAPI
 python-dotenv == 1.0.1    # Used to load environment variables from .env
