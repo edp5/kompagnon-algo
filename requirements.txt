@@ -8,3 +8,5 @@ psycopg2-binary >= 2.9.10 # Used as Postgres driver for SQLAlchemy
 fastapi == 0.128.8        # Used for API to exchange data with the main api
 uvicorn == 0.34.0         # Used as ASGI server to run FastAPI
 python-dotenv == 1.0.1    # Used to load environment variables from .env
+httpx == 0.28.1           # Used for testing API endpoints
+pytest-cov == 6.0.0       # Used for coverage reporting

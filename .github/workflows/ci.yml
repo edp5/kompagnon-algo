@@ -1,0 +1,40 @@
+name: Run tests and upload coverage
+
+on:
+  merge_group:
+    branches: [main]
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+    branches: [main]
+
+jobs:
+  test:
+    # Run if pr is not draft
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: copy environment variables
+        run: cp sample.env .env
+
+      - name: Run tests
+        run: pytest --cov --cov-branch --cov-report=xml
+
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: edp5/kompagnon-algo
