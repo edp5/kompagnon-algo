@@ -1,0 +1,73 @@
+{
+  "branches": ["main"],
+  "commit_parser": "angular",
+  "parse_commit_message": {
+    "pattern": "^(?P<type>\\w+)(\\((?P<scope>[^)]*?)\\))?!?: (?P<message>.*)$",
+    "commit_type_regex": "^(feat|fix|breaking|perf|revert|refactor|docs|tech|chore|style|test)",
+    "default_bump": null
+  },
+  "commit_types": [
+    {
+      "type": "breaking",
+      "release": "major",
+      "section": "💥 Breaking Changes"
+    },
+    {
+      "type": "feat",
+      "release": "minor",
+      "section": "🚀 New features"
+    },
+    {
+      "type": "fix",
+      "release": "patch",
+      "section": "🐛 Bug Fixes"
+    },
+    {
+      "type": "perf",
+      "release": "patch",
+      "section": "⏱️ Performance Improvements"
+    },
+    {
+      "type": "revert",
+      "release": "patch",
+      "section": "⏪ Reverts"
+    },
+    {
+      "type": "refactor",
+      "release": "patch",
+      "section": "🏗️ Code Refactoring"
+    },
+    {
+      "type": "docs",
+      "release": "patch",
+      "section": "📚 Documentation"
+    },
+    {
+      "type": "tech",
+      "release": "patch",
+      "section": "🛠️ Technical"
+    },
+    {
+      "type": "chore",
+      "release": false
+    },
+    {
+      "type": "style",
+      "release": false
+    },
+    {
+      "type": "test",
+      "release": false
+    }
+  ],
+  "version_toml": ["pyproject.toml:project.version"],
+  "build_command": "python -m pip install build && python -m build",
+  "upload_to_pypi": false,
+  "upload_to_release": true,
+  "changelog_file": "CHANGELOG.md",
+  "git_commit_message": "chore(release): {version}",
+  "git_push": true,
+  "git_tag": true,
+  "allow_zero_version": false
+}
+
