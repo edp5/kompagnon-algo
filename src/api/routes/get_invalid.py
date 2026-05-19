@@ -21,7 +21,7 @@ def get_invalid_users_list(db: Session = Depends(session.get_db)):
                 } for j in journeys
             ]
         }
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         return {
             "message": f"No users found. Error: {str(e)}",
             "data": []
