@@ -9,7 +9,7 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 - [x] Setup API
 - [x] Setup DB connection
 - [x] Add tests for API & DB connection
-- [ ] Implement algo logic
+- [x] Implement algo logic
 
 ## Proposed Architecture
 
@@ -28,6 +28,7 @@ kompagnon-algo/
 │   │   ├── routes/          # API endpoint routes
 │   │   │   ├── get_invalid.py
 │   │   │   ├── get_valid.py
+│   │   │   ├── match.py         # API Route to trigger matching for a single journey
 │   │   │   ├── put_journey.py
 │   │   │   ├── root.py
 │   │   │   └── status.py
@@ -37,12 +38,18 @@ kompagnon-algo/
 │   │   ├── session.py       # Database connection and session management
 │   │   └── models.py        # SQLAlchemy models (T1: Accompanied, T2: Accompanists, T3: FoundJourney)
 │   └── algorithm/
+│       ├── README.md        # Detailed algorithm documentation
+│       ├── main.py          # Batch matching entry point & DB saver
 │       ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
 │       └── scoring.py       # Math/Algo logic for compatibility calculation
 ├── tests/                   # Unit and integration tests
+│   ├── algorithm/           # Algorithm unit tests (matcher, main batch)
+│   │   ├── test_main.py
+│   │   └── test_matcher.py
 │   ├── conftest.py          # Fixtures and DB setup
 │   ├── test_get_invalid.py  # Tests for get-invalid route
 │   ├── test_get_valid.py    # Tests for get-valid route
+│   ├── test_match.py        # Tests for new /match API route
 │   ├── test_put_journey.py  # Tests for put-journey route
 │   ├── test_root.py         # Tests for root route
 │   ├── test_status.py       # Tests for status route
@@ -97,6 +104,16 @@ _Note: You can also launch the API manually if the environment is already activa
 ```bash
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
+
+## Running the Matching Algorithm (Dry-run)
+
+To manually run the core matching algorithm logic with mock data and see the logging output (as part of the initial issue 28 setup):
+
+```bash
+python -m src.algorithm.main
+```
+
+This will run the `run_algorithm` function, match mock passengers and companions based on origin and destination coordinates, and output the result to the console.
 
 ## Testing
 
