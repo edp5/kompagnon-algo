@@ -57,12 +57,21 @@ def test_match_passenger_success(client, db_session, sample_companion_payload, s
     assert len(data["found_journey_ids"]) == 1
 
 def test_match_journey_not_found(client):
+    # Companion role
     response = client.post("/match", json={
         "journey_id": 9999,
         "role": "companion"
     })
     assert response.status_code == 404
-    assert "not found" in response.json()["detail"]
+    assert "Companion journey with ID 9999 not found" in response.json()["detail"]
+
+    # Passenger role
+    response = client.post("/match", json={
+        "journey_id": 9999,
+        "role": "passenger"
+    })
+    assert response.status_code == 404
+    assert "Passenger journey with ID 9999 not found" in response.json()["detail"]
 
 def test_match_no_candidates(client, db_session, sample_companion_payload):
     # Insert companion but no passenger

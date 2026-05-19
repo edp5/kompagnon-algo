@@ -20,7 +20,7 @@ def get_unmatched_journeys(db: Session, model):
     elif model == PassengerJourney:
         subquery = db.query(FoundJourney.passengerJourneyId).filter(FoundJourney.passengerJourneyId.isnot(None))
         return db.query(PassengerJourney).filter(PassengerJourney.id.notin_(subquery)).all()
-    return []
+    return []  # pragma: no cover
 
 def run_algorithm(db_session: Optional[Session] = None):
     logger.info("Starting Kompagnon matching algorithm (PROD mode)...")
@@ -84,5 +84,5 @@ def save_matches(matches: list, db: Session) -> None:
     
     db.commit()
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     run_algorithm()
