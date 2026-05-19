@@ -15,11 +15,12 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 
 ```text
 kompagnon-algo/
+├── doc/                     # Documentation directory
+│   └── README_algo.md       # Detailed algorithm documentation
 ├── src/                     # Source code directory
 │   ├── algorithm/           # Core matching algorithm
 │   │   ├── main.py          # Batch matching entry point & DB saver
-│   │   ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
-│   │   └── README.md        # Detailed algorithm documentation
+│   │   └── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
 │   ├── api/                 # API layer
 │   │   ├── routes/          # API endpoint routes
 │   │   │   ├── __init__.py
