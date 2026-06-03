@@ -45,3 +45,7 @@ class FoundJourney(Base):
     status = sa.Column(sa.String, nullable=False, default="WAITING")
     created_at = sa.Column(sa.DateTime)
     updated_at = sa.Column(sa.DateTime)
+
+    __table_args__ = (
+        sa.UniqueConstraint('companionJourneyId', 'passengerJourneyId', name='uq_found_journey_pair'),
+    )

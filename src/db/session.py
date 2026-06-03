@@ -9,7 +9,7 @@ load_dotenv()
 # Use postgresql+psycopg2 for the database driver. The main API uses postgres on port 5432.
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL is None:
+if DATABASE_URL is None:  # pragma: no cover
     raise ValueError("DATABASE_URL environment variable is not set")
 
 if DATABASE_URL.startswith("postgres://"):
@@ -18,7 +18,7 @@ if DATABASE_URL.startswith("postgres://"):
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_db():
+def get_db():  # pragma: no cover
     db = SessionLocal()
     try:
         yield db

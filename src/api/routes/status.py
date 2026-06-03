@@ -11,7 +11,7 @@ def status(db: Session = Depends(session.get_db)):
     try:
         db.execute(models.sa.text("SELECT 1"))
         db_status = "ok"
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         db_status = f"down: {str(e)}"
 
     return {"status": "ok", "db_status": db_status}

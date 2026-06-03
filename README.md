@@ -9,45 +9,56 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 - [x] Setup API
 - [x] Setup DB connection
 - [x] Add tests for API & DB connection
-- [ ] Implement algo logic
+- [x] Implement algo logic
 
 ## Proposed Architecture
 
 ```text
 kompagnon-algo/
-├── .env                     # Local environment variables (created from sample.env)
-├── sample.env               # Template for environment variables
-├── configure.sh             # Environment setup (venv & dependencies)
-├── start.sh                 # API launcher (Uvicorn)
-├── requirements.txt         # Project and testing dependencies
-├── pytest.ini               # Pytest configuration
-├── pyproject.toml           # Project configuration
-├── render.yaml              # Render deployment configuration
-├── src/
-│   ├── api/
+├── doc/                     # Documentation directory
+│   └── README_algo.md       # Detailed algorithm documentation
+├── src/                     # Source code directory
+│   ├── algorithm/           # Core matching algorithm
+│   │   ├── main.py          # Batch matching entry point & DB saver
+│   │   └── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
+│   ├── api/                 # API layer
 │   │   ├── routes/          # API endpoint routes
+│   │   │   ├── __init__.py
 │   │   │   ├── get_invalid.py
 │   │   │   ├── get_valid.py
+│   │   │   ├── match.py         # API Route to trigger matching for a single journey
 │   │   │   ├── put_journey.py
 │   │   │   ├── root.py
 │   │   │   └── status.py
 │   │   ├── main.py          # FastAPI application instance & routing setup
 │   │   └── schema.py        # Pydantic models for API requests/responses
-│   ├── db/
-│   │   ├── session.py       # Database connection and session management
-│   │   └── models.py        # SQLAlchemy models (T1: Accompanied, T2: Accompanists, T3: FoundJourney)
-│   └── algorithm/
-│       ├── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
-│       └── scoring.py       # Math/Algo logic for compatibility calculation
+│   └── db/                  # Database layer
+│       ├── models.py        # SQLAlchemy models (T1: Accompanied, T2: Accompanists, T3: FoundJourney)
+│       └── session.py       # Database connection and session management
 ├── tests/                   # Unit and integration tests
+│   ├── algorithm/           # Algorithm unit tests (matcher, main batch)
+│   │   ├── test_main.py
+│   │   └── test_matcher.py
+│   ├── __init__.py
 │   ├── conftest.py          # Fixtures and DB setup
 │   ├── test_get_invalid.py  # Tests for get-invalid route
 │   ├── test_get_valid.py    # Tests for get-valid route
+│   ├── test_match.py        # Tests for new /match API route
 │   ├── test_put_journey.py  # Tests for put-journey route
 │   ├── test_root.py         # Tests for root route
-│   ├── test_status.py       # Tests for status route
-│   └── __init__.py
-└── README.md
+│   └── test_status.py       # Tests for status route
+├── .env                     # Local environment variables (created from sample.env)
+├── .gitignore               # Git ignore rules
+├── CHANGELOG.md             # Project changelog
+├── configure.sh             # Environment setup (venv & dependencies)
+├── pyproject.toml           # Project configuration
+├── pytest.ini               # Pytest configuration
+├── README.md                # Global documentation
+├── render.yaml              # Render deployment configuration
+├── requirements.txt         # Project and testing dependencies
+├── sample.env               # Template for environment variables
+├── start.sh                 # API launcher (Uvicorn)
+└── test.sh                  # Shell script to run tests
 ```
 
 ## How to access Swagger Documentation
@@ -97,6 +108,16 @@ _Note: You can also launch the API manually if the environment is already activa
 ```bash
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
+
+## Running the Matching Algorithm (Dry-run)
+
+To manually run the core matching algorithm logic with mock data and see the logging output (as part of the initial issue 28 setup):
+
+```bash
+python -m src.algorithm.main
+```
+
+This will run the `run_algorithm` function, match mock passengers and companions based on origin and destination coordinates, and output the result to the console.
 
 ## Testing
 
