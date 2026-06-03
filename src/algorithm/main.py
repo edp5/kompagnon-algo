@@ -1,13 +1,12 @@
 import logging
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from src.algorithm.matcher import find_matches
 from src.db.session import SessionLocal
 from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
 from datetime import datetime, timezone
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def get_unmatched_journeys(db: Session, model):
@@ -56,10 +55,11 @@ def run_algorithm(db_session: Optional[Session] = None):
         if not matches:
             logger.info("No matches found.")
         else:
-            save_matches(matches, db)
+            saved_ids = save_matches(matches, db)
+            db.commit()
             for match in matches:
                 logger.info(f" - Saved Match: Passenger {match['passenger_journey_id']} <-> Companion {match['companion_journey_id']}")
-            logger.info(f"Successfully saved {len(matches)} matches to the DB.")
+            logger.info(f"Successfully saved {len(saved_ids)} matches to the DB.")
             
     except Exception as e:
         logger.error(f"Error during matching algorithm execution: {e}")
@@ -68,10 +68,14 @@ def run_algorithm(db_session: Optional[Session] = None):
         if not db_session:
             db.close()
 
-def save_matches(matches: list, db: Session) -> None:
+def save_matches(matches: list, db: Session) -> list[int]:
     """
     Save the list of matched dictionaries into the found_journeys table.
+    Flushes to obtain IDs but does NOT commit — the caller owns the transaction.
+    Returns the list of created FoundJourney IDs.
+    Silently skips duplicates (IntegrityError) to ensure idempotency.
     """
+    created_ids: list[int] = []
     for match in matches:
         new_match = FoundJourney(
             companionJourneyId=match["companion_journey_id"],
@@ -81,8 +85,14 @@ def save_matches(matches: list, db: Session) -> None:
             updated_at=datetime.now(timezone.utc)
         )
         db.add(new_match)
-    
-    db.commit()
+        try:
+            db.flush()
+            db.refresh(new_match)
+            created_ids.append(new_match.id)
+        except IntegrityError:
+            db.rollback()
+    return created_ids
 
 if __name__ == "__main__":  # pragma: no cover
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     run_algorithm()

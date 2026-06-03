@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.db.session import get_db
-from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
+from src.db.models import CompanionJourney, PassengerJourney
 from src.api.schema import MatchRequest, MatchResponse, JourneyRole
 from src.algorithm.matcher import find_matches
 from src.algorithm.main import save_matches, get_unmatched_journeys
@@ -44,21 +44,10 @@ def match_journey(payload: MatchRequest, db: Session = Depends(get_db)):
     matches = find_matches(companions, passengers)
     
     # 3. Save matches to DB and collect their IDs
-    found_journey_ids = []
+    found_journey_ids: list[int] = []
     if matches:
-        # Save matches
-        save_matches(matches, db)
-        
-        # Retrieve the newly created match IDs
-        passenger_ids = [m["passenger_journey_id"] for m in matches]
-        companion_ids = [m["companion_journey_id"] for m in matches]
-        
-        created_matches = db.query(FoundJourney).filter(
-            FoundJourney.passengerJourneyId.in_(passenger_ids),
-            FoundJourney.companionJourneyId.in_(companion_ids)
-        ).all()
-        
-        found_journey_ids = [m.id for m in created_matches]
+        found_journey_ids = save_matches(matches, db)
+        db.commit()
 
     return MatchResponse(
         found_journey_ids=found_journey_ids,
