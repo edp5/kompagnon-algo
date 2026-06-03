@@ -74,6 +74,10 @@ def save_matches(matches: list, db: Session) -> list[int]:
     Flushes to obtain IDs but does NOT commit — the caller owns the transaction.
     Returns the list of created FoundJourney IDs.
     Silently skips duplicates (IntegrityError) to ensure idempotency.
+
+    Each insert is wrapped in a savepoint (db.begin_nested()) so that an
+    IntegrityError on one row only rolls back that savepoint, leaving all
+    previously flushed rows intact in the outer transaction.
     """
     created_ids: list[int] = []
     for match in matches:
@@ -84,13 +88,15 @@ def save_matches(matches: list, db: Session) -> list[int]:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
+        savepoint = db.begin_nested()
         db.add(new_match)
         try:
             db.flush()
             db.refresh(new_match)
             created_ids.append(new_match.id)
+            savepoint.commit()
         except IntegrityError:
-            db.rollback()
+            savepoint.rollback()
     return created_ids
 
 if __name__ == "__main__":  # pragma: no cover

@@ -179,3 +179,86 @@ def test_match_duplicate_is_idempotent(client, db_session, sample_companion_payl
         FoundJourney.passengerJourneyId == passenger.id,
     ).count()
     assert count == 1
+
+
+def test_match_mixed_batch_new_duplicate_new(db_session, sample_companion_payload, sample_passenger_payload):
+    """
+    Mixed batch [new_A, duplicate_B, new_C] must:
+    - return exactly 2 IDs (A and C),
+    - persist exactly those 2 rows in the DB,
+    - leave the pre-existing duplicate row untouched (still 1 row for pair B).
+    """
+    from src.algorithm.main import save_matches
+    from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
+    from datetime import datetime, timezone
+
+    # --- helper to build a unique journey pair ---
+    def make_pair(user_id_c, user_id_p):
+        c = CompanionJourney(**{**sample_companion_payload, "userId": user_id_c})
+        p = PassengerJourney(**{**sample_passenger_payload, "userId": user_id_p})
+        db_session.add(c)
+        db_session.add(p)
+        db_session.commit()
+        db_session.refresh(c)
+        db_session.refresh(p)
+        return c, p
+
+    # Pair A (new)
+    c_a, p_a = make_pair(101, 201)
+    # Pair B (will be pre-inserted then offered again as duplicate)
+    c_b, p_b = make_pair(102, 202)
+    # Pair C (new)
+    c_c, p_c = make_pair(103, 203)
+
+    # Pre-insert pair B so it triggers an IntegrityError during the batch
+    pre_b = FoundJourney(
+        companionJourneyId=c_b.id,
+        passengerJourneyId=p_b.id,
+        status="WAITING",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    db_session.add(pre_b)
+    db_session.commit()
+    db_session.refresh(pre_b)
+
+    # Build the mixed batch: [new_A, duplicate_B, new_C]
+    batch = [
+        {"companion_journey_id": c_a.id, "passenger_journey_id": p_a.id},
+        {"companion_journey_id": c_b.id, "passenger_journey_id": p_b.id},  # duplicate
+        {"companion_journey_id": c_c.id, "passenger_journey_id": p_c.id},
+    ]
+
+    created_ids = save_matches(batch, db_session)
+    db_session.commit()
+
+    # --- assertions ---
+    # 1. Exactly 2 IDs returned (A and C); B was skipped
+    assert len(created_ids) == 2, f"Expected 2 created IDs, got {len(created_ids)}: {created_ids}"
+
+    # 2. Both returned IDs actually exist in the DB
+    for fid in created_ids:
+        row = db_session.query(FoundJourney).filter(FoundJourney.id == fid).first()
+        assert row is not None, f"FoundJourney id={fid} not found in DB"
+
+    # 3. Pair A is persisted
+    row_a = db_session.query(FoundJourney).filter(
+        FoundJourney.companionJourneyId == c_a.id,
+        FoundJourney.passengerJourneyId == p_a.id,
+    ).one_or_none()
+    assert row_a is not None, "Pair A must be persisted"
+
+    # 4. Pair C is persisted
+    row_c = db_session.query(FoundJourney).filter(
+        FoundJourney.companionJourneyId == c_c.id,
+        FoundJourney.passengerJourneyId == p_c.id,
+    ).one_or_none()
+    assert row_c is not None, "Pair C must be persisted"
+
+    # 5. Pair B still has exactly 1 row (no extra duplicate created)
+    count_b = db_session.query(FoundJourney).filter(
+        FoundJourney.companionJourneyId == c_b.id,
+        FoundJourney.passengerJourneyId == p_b.id,
+    ).count()
+    assert count_b == 1, f"Pair B must have exactly 1 row, got {count_b}"
+
