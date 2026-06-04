@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
@@ -27,14 +28,14 @@ def get_unmatched_passengers(db: Session) -> list[PassengerJourney]:
     return db.query(PassengerJourney).filter(PassengerJourney.id.notin_(subquery)).all()
 
 
-def get_companion_by_id(db: Session, journey_id: int) -> CompanionJourney | None:
+def get_companion_by_id(db: Session, journey_id: int) -> Optional[CompanionJourney]:
     """
     Fetch a single CompanionJourney by its ID.
     """
     return db.query(CompanionJourney).filter(CompanionJourney.id == journey_id).first()
 
 
-def get_passenger_by_id(db: Session, journey_id: int) -> PassengerJourney | None:
+def get_passenger_by_id(db: Session, journey_id: int) -> Optional[PassengerJourney]:
     """
     Fetch a single PassengerJourney by its ID.
     """
@@ -65,7 +66,6 @@ def save_matches(matches: list, db: Session) -> list[int]:
         db.add(new_match)
         try:
             db.flush()
-            db.refresh(new_match)
             created_ids.append(new_match.id)
             savepoint.commit()
         except IntegrityError:
