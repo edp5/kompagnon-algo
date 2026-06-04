@@ -16,7 +16,7 @@ def test_match_companion_success(client, db_session, sample_companion_payload, s
     db_session.refresh(passenger)
 
     # 3. Call the match API
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": companion.id,
         "role": "companion"
     })
@@ -47,7 +47,7 @@ def test_match_passenger_success(client, db_session, sample_companion_payload, s
     db_session.refresh(passenger)
 
     # 3. Call the match API targeting the passenger
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": passenger.id,
         "role": "passenger"
     })
@@ -58,7 +58,7 @@ def test_match_passenger_success(client, db_session, sample_companion_payload, s
 
 def test_match_journey_not_found(client):
     # Companion role
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": 9999,
         "role": "companion"
     })
@@ -66,7 +66,7 @@ def test_match_journey_not_found(client):
     assert "Companion journey with ID 9999 not found" in response.json()["detail"]
 
     # Passenger role
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": 9999,
         "role": "passenger"
     })
@@ -80,7 +80,7 @@ def test_match_no_candidates(client, db_session, sample_companion_payload):
     db_session.commit()
     db_session.refresh(companion)
 
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": companion.id,
         "role": "companion"
     })
@@ -133,7 +133,7 @@ def test_match_returns_only_ids_created_by_current_call(client, db_session, samp
     db_session.refresh(new_passenger)
 
     # 3. Call /match for the new companion — it should only match new_passenger
-    response = client.post("/match", json={
+    response = client.post("/api/match", json={
         "journey_id": new_companion.id,
         "role": "companion"
     })
@@ -160,12 +160,12 @@ def test_match_duplicate_is_idempotent(client, db_session, sample_companion_payl
     db_session.refresh(passenger)
 
     # 2. First call — should succeed and create 1 match
-    response1 = client.post("/match", json={"journey_id": companion.id, "role": "companion"})
+    response1 = client.post("/api/match", json={"journey_id": companion.id, "role": "companion"})
     assert response1.status_code == 200
     assert len(response1.json()["found_journey_ids"]) == 1
 
     # 3. Second call — duplicate must be silently skipped, not crash
-    response2 = client.post("/match", json={"journey_id": companion.id, "role": "companion"})
+    response2 = client.post("/api/match", json={"journey_id": companion.id, "role": "companion"})
     assert response2.status_code == 200
     # The companion is now already matched so get_unmatched_journeys should return 0 candidates,
     # meaning 0 new rows are created.
