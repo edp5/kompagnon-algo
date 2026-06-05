@@ -89,9 +89,9 @@ def test_run_algorithm_no_match(db_session, caplog):
 def test_run_algorithm_exception(monkeypatch, db_session, caplog):
     def mock_get_unmatched(*args, **kwargs):
         raise Exception("Mock DB error")
-        
+
     import src.algorithm.main
-    monkeypatch.setattr(src.algorithm.main, "get_unmatched_journeys", mock_get_unmatched)
+    monkeypatch.setattr(src.algorithm.main, "get_unmatched_companions", mock_get_unmatched)
 
     with caplog.at_level(logging.ERROR):
         run_algorithm(db_session)
