@@ -10,4 +10,4 @@ uvicorn == 0.39.0         # Used as ASGI server to run FastAPI
 python-dotenv == 1.2.1    # Used to load environment variables from .env
 httpx == 0.28.1           # Used for testing API endpoints
 pytest-cov == 7.1.0       # Used for coverage reporting
-tomli == 2.0.1             # Used for parsing TOML configuration files
+tomli == 2.4.1             # Used for parsing TOML configuration files
