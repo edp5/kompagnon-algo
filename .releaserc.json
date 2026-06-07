@@ -1,21 +1,24 @@
 {
   "branches": ["main"],
-  "commit_parser": "angular",
+
+  "commit_parser": "conventional",
+
   "parse_commit_message": {
-    "pattern": "^(?P<type>\\w+)(\\((?P<scope>[^)]*?)\\))?!?: (?P<message>.*)$",
-    "commit_type_regex": "^(feat|fix|breaking|perf|revert|refactor|docs|tech|chore|style|test)",
+    "pattern": "^(?P<type>feat|fix|perf|revert|refactor|docs|chore|style|test)(?:\\((?P<scope>[^)]*?)\\))?(?P<breaking>!)?: (?P<message>.*)$",
+    "commit_type_regex": "^(feat|fix|perf|revert|refactor|docs|chore|style|test)$",
     "default_bump": null
   },
+
   "commit_types": [
-    {
-      "type": "breaking",
-      "release": "major",
-      "section": "💥 Breaking Changes"
-    },
     {
       "type": "feat",
       "release": "minor",
-      "section": "🚀 New features"
+      "section": "🚀 Features"
+    },
+    {
+      "type": "breaking",
+        "release": "major",
+        "section": "💥 Breaking Changes"
     },
     {
       "type": "fix",
@@ -25,7 +28,7 @@
     {
       "type": "perf",
       "release": "patch",
-      "section": "⏱️ Performance Improvements"
+      "section": "⚡ Performance Improvements"
     },
     {
       "type": "revert",
@@ -35,17 +38,12 @@
     {
       "type": "refactor",
       "release": "patch",
-      "section": "🏗️ Code Refactoring"
+      "section": "🏗️ Refactoring"
     },
     {
       "type": "docs",
       "release": "patch",
       "section": "📚 Documentation"
-    },
-    {
-      "type": "tech",
-      "release": "patch",
-      "section": "🛠️ Technical"
     },
     {
       "type": "chore",
@@ -60,14 +58,20 @@
       "release": false
     }
   ],
+
   "version_toml": ["pyproject.toml:project.version"],
+
   "build_command": "python -m pip install build && python -m build",
+
   "upload_to_pypi": false,
   "upload_to_release": true,
+
   "changelog_file": "CHANGELOG.md",
+
   "git_commit_message": "chore(release): {version}",
+
   "git_push": true,
   "git_tag": true,
+
   "allow_zero_version": false
 }
-
