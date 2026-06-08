@@ -1,6 +1,6 @@
 # kompagnon-algo
 
-This repository is the part of the algorithm of matching for users in kompagnon.
+This repository contains the **multi-criteria matching algorithm** for Kompagnon — a service that pairs passengers with companions for shared journeys.
 
 ## Roadmap
 
@@ -10,6 +10,7 @@ This repository is the part of the algorithm of matching for users in kompagnon.
 - [x] Setup DB connection
 - [x] Add tests for API & DB connection
 - [x] Implement algo logic
+- [x] Multi-criteria scoring algorithm (geo + time + address)
 
 ## Proposed Architecture
 
@@ -19,8 +20,9 @@ kompagnon-algo/
 │   └── README_algo.md       # Detailed algorithm documentation
 ├── src/                     # Source code directory
 │   ├── algorithm/           # Core matching algorithm
+│   │   ├── config.py        # Algorithm configuration (reads env vars)
 │   │   ├── main.py          # Batch matching entry point & DB saver
-│   │   └── matcher.py       # Core matching logic (Orchestrates T1/T2 search)
+│   │   └── matcher.py       # Multi-criteria scoring engine (geo, time, address)
 │   ├── api/                 # API layer
 │   │   ├── routes/          # API endpoint routes
 │   │   │   ├── __init__.py
@@ -65,19 +67,41 @@ kompagnon-algo/
 
 Once the server is running (see [Project Setup](#project-setup)), you can access the automatic interactive documentation:
 
-- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Swagger UI**: [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
+- **ReDoc**: [http://localhost:8000/api/redoc](http://localhost:8000/api/redoc)
 
-## Workflow Description
+> **Note:** All API routes are prefixed with `/api`.
 
-1. **Trigger**: The main API calls `kompagnon-algo` on Route **G** (Accompanist) or **H** (Accompanied) with a `journey_id` (A).
-2. **Fetch**: The algo fetches the data for journey A from **Table T1** (or T2 depending on the type).
-3. **Match**:
-   - If **Accompanied (H)**: The algo searches for candidates in **Table T2** (Accompanists).
-   - If **Accompanist (G)**: The algo searches for candidates in **Table T1** (Accompanied).
-4. **Calculations**: Scikit-learn/Pandas are used to rank candidates.
-5. **Storage**: A new entry is created in **Table T3** (`foundJourney`) linking the two journeys.
-6. **Response**: The algo returns the ID of the matched journeys from **Table T3** to the caller.
+## Matching Algorithm
+
+The matching engine uses a **weighted multi-criteria scoring system** (0.0 → 1.0) to pair companions and passengers:
+
+| Criterion | Weight | Method | Rejection threshold |
+|-----------|--------|--------|--------------------|
+| 🌍 Geographic proximity | 40% | Haversine distance (departure + arrival) | > 5 km |
+| ⏰ Time compatibility | 40% | Departure time difference | > 30 min |
+| 📝 Address match | 20% | Case-insensitive text comparison | None (bonus) |
+
+A pair is considered a valid match when `score ≥ 0.5`. Results are sorted by score descending (best matches first).
+
+All thresholds and weights are **configurable via environment variables** (see [Configuration](#algorithm-configuration)).
+
+### Workflow
+
+1. **Trigger**: The main API calls `POST /api/match` with a `journey_id` and `role` (companion or passenger).
+2. **Fetch**: The algo fetches the target journey and all unmatched candidates of the opposite role.
+3. **Score**: Every (companion, passenger) pair is scored across three dimensions.
+4. **Filter**: Only pairs with `score ≥ MIN_MATCH_SCORE` are retained.
+5. **Storage**: Valid matches are saved in `found_journeys` linking the two journey IDs.
+6. **Response**: The algo returns the IDs of the created matches.
+
+### Batch mode
+
+To run the algorithm on **all** unmatched journeys at once:
+
+```bash
+python -m src.algorithm.main
+```
 
 ## Project Setup & Running the API
 
@@ -109,15 +133,21 @@ _Note: You can also launch the API manually if the environment is already activa
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
 
-## Running the Matching Algorithm (Dry-run)
+### Algorithm Configuration
 
-To manually run the core matching algorithm logic with mock data and see the logging output (as part of the initial issue 28 setup):
+All matching parameters are configurable via environment variables in `.env` (or `sample.env` as template):
 
-```bash
-python -m src.algorithm.main
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MATCH_MAX_DISTANCE_KM` | `5.0` | Maximum distance (km) for a geographic match |
+| `MATCH_PERFECT_DISTANCE_KM` | `0.5` | Distance (km) for a perfect geo score (1.0) |
+| `MATCH_TIME_TOLERANCE_MINUTES` | `30` | Maximum departure time difference (minutes) |
+| `MATCH_MIN_SCORE` | `0.5` | Minimum combined score to accept a match |
+| `MATCH_WEIGHT_GEO` | `0.40` | Weight of geographic proximity |
+| `MATCH_WEIGHT_TIME` | `0.40` | Weight of time compatibility |
+| `MATCH_WEIGHT_ADDRESS` | `0.20` | Weight of textual address match |
 
-This will run the `run_algorithm` function, match mock passengers and companions based on origin and destination coordinates, and output the result to the console.
+Modify these values in your `.env` file and restart the server — no code changes needed.
 
 ## Testing
 
@@ -138,5 +168,6 @@ The test suite includes:
 - **SQLite In-Memory**: A clean, isolated database for each test session.
 - **Fixtures**: Automated setup/teardown for database tables and test data.
 - **Happy & Sad Path**: Coverage for successful requests, validation errors (422), and edge cases.
+- **Algorithm unit tests**: Haversine distance, geo/time/address scoring, combined scoring, and threshold behavior.
 
 The testing configuration is managed via `pytest.ini`.

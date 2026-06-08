@@ -13,6 +13,21 @@ from src.repository.journey_repository import (
 logger = logging.getLogger(__name__)
 
 
+def _journey_to_dict(j) -> dict:
+    """Convert a CompanionJourney or PassengerJourney ORM object to a plain dict."""
+    return {
+        "id": j.id,
+        "departureAddress": j.departureAddress,
+        "arrivalAddress": j.arrivalAddress,
+        "departureLat": float(j.departureLat),
+        "departureLon": float(j.departureLon),
+        "arrivalLat": float(j.arrivalLat),
+        "arrivalLon": float(j.arrivalLon),
+        "departureTime": j.departureTime,
+        "arrivalTime": j.arrivalTime,
+    }
+
+
 def handle_match(journey_id: int, role: JourneyRole, db: Session) -> MatchResponse:
     """
     Orchestrates the matching logic for a given journey:
@@ -30,8 +45,8 @@ def handle_match(journey_id: int, role: JourneyRole, db: Session) -> MatchRespon
             raise ValueError(f"Companion journey with ID {journey_id} not found")
 
         candidates = get_unmatched_passengers(db)
-        companions = [{"id": target.id, "departureAddress": target.departureAddress, "arrivalAddress": target.arrivalAddress}]
-        passengers = [{"id": p.id, "departureAddress": p.departureAddress, "arrivalAddress": p.arrivalAddress} for p in candidates]
+        companions = [_journey_to_dict(target)]
+        passengers = [_journey_to_dict(p) for p in candidates]
 
     else:  # PASSENGER
         target = get_passenger_by_id(db, journey_id)
@@ -39,8 +54,8 @@ def handle_match(journey_id: int, role: JourneyRole, db: Session) -> MatchRespon
             raise ValueError(f"Passenger journey with ID {journey_id} not found")
 
         candidates = get_unmatched_companions(db)
-        companions = [{"id": c.id, "departureAddress": c.departureAddress, "arrivalAddress": c.arrivalAddress} for c in candidates]
-        passengers = [{"id": target.id, "departureAddress": target.departureAddress, "arrivalAddress": target.arrivalAddress}]
+        companions = [_journey_to_dict(c) for c in candidates]
+        passengers = [_journey_to_dict(target)]
 
     logger.info(f"Running matching for {role} journey ID {journey_id} against {len(candidates)} candidate(s).")
 
