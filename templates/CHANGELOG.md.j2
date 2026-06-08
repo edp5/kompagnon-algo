@@ -1,0 +1,62 @@
+#Changelog
+{% for version, release in ctx.history.released.items() %}
+## {{ version.as_tag() }} ({{ release.tagged_date.strftime("%Y-%m-%d") }})
+{% set sections = {
+"breaking": [],
+"feat": [],
+"fix": [],
+"perf": [],
+"refactor": [],
+"docs": [],
+"revert": []
+} %}
+{% for type_, commits in release["elements"] %}
+{% if type_ in sections %}
+{% for commit in commits %}
+{% set _ = sections[type_].append(commit) %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% if sections.breaking %}
+### 💥 Breaking Changes
+{% for commit in sections.breaking %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.feat %}
+### 🚀 Features
+{% for commit in sections.feat %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.fix %}
+### 🐛 Bug Fixes
+{% for commit in sections.fix %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.perf %}
+### ⚡ Performance Improvements
+{% for commit in sections.perf %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.refactor %}
+### 🏗️ Refactoring
+{% for commit in sections.refactor %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.docs %}
+### 📚 Documentation
+{% for commit in sections.docs %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% if sections.revert %}
+### ⏪ Reverts
+{% for commit in sections.revert %}
+{{ commit.descriptions[0] | capitalize }}
+{% endfor %}
+{% endif %}
+{% endfor %}

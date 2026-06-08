@@ -12,10 +12,74 @@ dependencies = []
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+
+# =========================
+# SEMANTIC RELEASE CONFIG
+# =========================
+
 [tool.semantic_release]
+branch = "use-pyproject-release-system"
+
+commit_parser = "conventional"
+
+commit_message = "chore(release): {version}"
+tag_format = "v{version}"
+
+allow_zero_version = false
+
 version_toml = ["pyproject.toml:project.version"]
-branch = "main"
-commit_parser = "angular"
+
 build_command = "python -m pip install build && python -m build"
+
 upload_to_pypi = false
 upload_to_release = true
+
+
+# =========================
+# BRANCH RULES (IMPORTANT)
+# =========================
+
+[tool.semantic_release.branches.use-pyproject-release-system]
+match = "use-pyproject-release-system"
+
+
+# =========================
+# COMMIT RULES
+# =========================
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "feat",
+    "fix",
+    "perf",
+    "docs",
+    "refactor",
+    "revert",
+    "chore",
+    "style",
+    "test",
+    "ci",
+    "build"
+]
+
+minor_tags = ["feat"]
+
+patch_tags = [
+    "fix",
+    "perf",
+    "docs",
+    "refactor",
+    "revert"
+]
+
+
+# =========================
+# CHANGELOG
+# =========================
+
+[tool.semantic_release.changelog]
+template_dir = "templates"
+default_templates.changelog_file = "CHANGELOG.md"
+exclude_commit_patterns = [
+    "^chore\\(release\\):"
+]
