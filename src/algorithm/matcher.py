@@ -79,6 +79,8 @@ def _geo_score(
     def _distance_to_score(dist: float) -> float:
         if dist <= PERFECT_DISTANCE_KM:
             return 1.0
+        if MAX_DISTANCE_KM <= PERFECT_DISTANCE_KM:
+            return 1.0
         # Linear decay from 1.0 → 0.0 between PERFECT and MAX distance.
         return max(0.0, 1.0 - (dist - PERFECT_DISTANCE_KM) / (MAX_DISTANCE_KM - PERFECT_DISTANCE_KM))
 

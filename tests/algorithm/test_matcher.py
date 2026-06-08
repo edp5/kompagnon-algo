@@ -9,10 +9,19 @@ Tests cover:
   - Combined scoring & find_matches behavior
   - Sorting by score
 """
-import math
 import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
+
+@pytest.fixture(autouse=True)
+def pin_matcher_constants(monkeypatch):
+    monkeypatch.setattr("src.algorithm.matcher.MAX_DISTANCE_KM", 5.0)
+    monkeypatch.setattr("src.algorithm.matcher.PERFECT_DISTANCE_KM", 0.5)
+    monkeypatch.setattr("src.algorithm.matcher.TIME_TOLERANCE_MINUTES", 30)
+    monkeypatch.setattr("src.algorithm.matcher.WEIGHT_GEO", 0.40)
+    monkeypatch.setattr("src.algorithm.matcher.WEIGHT_TIME", 0.40)
+    monkeypatch.setattr("src.algorithm.matcher.WEIGHT_ADDRESS", 0.20)
+    monkeypatch.setattr("src.algorithm.matcher.MIN_MATCH_SCORE", 0.5)
 
 from src.algorithm.matcher import (
     find_matches,

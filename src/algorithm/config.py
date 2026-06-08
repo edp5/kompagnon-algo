@@ -65,3 +65,22 @@ MIN_MATCH_SCORE: float = _env_float("MATCH_MIN_SCORE", 0.5)
 WEIGHT_GEO: float = _env_float("MATCH_WEIGHT_GEO", 0.40)
 WEIGHT_TIME: float = _env_float("MATCH_WEIGHT_TIME", 0.40)
 WEIGHT_ADDRESS: float = _env_float("MATCH_WEIGHT_ADDRESS", 0.20)
+
+# Validate distances
+if PERFECT_DISTANCE_KM < 0:
+    logger.warning(f"Invalid PERFECT_DISTANCE_KM ({PERFECT_DISTANCE_KM}), resetting to 0.0")
+    PERFECT_DISTANCE_KM = 0.0
+
+if MAX_DISTANCE_KM < PERFECT_DISTANCE_KM:
+    logger.warning(f"MAX_DISTANCE_KM ({MAX_DISTANCE_KM}) < PERFECT_DISTANCE_KM ({PERFECT_DISTANCE_KM}), overriding MAX_DISTANCE_KM")
+    MAX_DISTANCE_KM = PERFECT_DISTANCE_KM
+
+# Validate & normalize weights
+total_weight = WEIGHT_GEO + WEIGHT_TIME + WEIGHT_ADDRESS
+if total_weight <= 0:
+    logger.warning("Weights sum to <= 0. Resetting to defaults.")
+    WEIGHT_GEO, WEIGHT_TIME, WEIGHT_ADDRESS = 0.40, 0.40, 0.20
+else:
+    WEIGHT_GEO /= total_weight
+    WEIGHT_TIME /= total_weight
+    WEIGHT_ADDRESS /= total_weight
