@@ -58,9 +58,6 @@ def save_matches(matches: list, db: Session) -> list[int]:
         new_match = FoundJourney(
             companionJourneyId=match["companion_journey_id"],
             passengerJourneyId=match["passenger_journey_id"],
-            status="WAITING",
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
         )
         savepoint = db.begin_nested()
         db.add(new_match)
