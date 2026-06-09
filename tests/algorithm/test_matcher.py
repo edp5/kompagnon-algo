@@ -159,6 +159,12 @@ class TestTimeScore:
         p = _passenger(dep_time=_BASE_TIME)
         assert _time_score(c, p) == 0.0
 
+    def test_tolerance_zero(self):
+        c = _companion(dep_time=_BASE_TIME)
+        p = _passenger(dep_time=_BASE_TIME)
+        with patch("src.algorithm.matcher.TIME_TOLERANCE_MINUTES", 0):
+            assert _time_score(c, p) == 1.0
+
 
 # ---------------------------------------------------------------------------
 # Address score
