@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
 from src.api.schema import JourneyRole
 from src.controller.match_controller import handle_match
@@ -55,10 +56,20 @@ class TestHandleMatchCompanion:
         assert response.found_journey_ids == []
         assert "Found and saved 0 match(es)" in response.message
 
-    def test_companion_no_address_match(self, db_session, sample_companion_payload, sample_passenger_payload):
-        """A companion and a passenger with different addresses → 0 matches."""
+    def test_no_match_when_criteria_differ(self, db_session, sample_companion_payload, sample_passenger_payload):
+        """A companion and a passenger with different addresses, coords AND times → 0 matches."""
         companion = make_companion(db_session, sample_companion_payload)
-        different_payload = {**sample_passenger_payload, "departureAddress": "Bordeaux", "arrivalAddress": "Nantes"}
+        different_payload = {
+            **sample_passenger_payload,
+            "departureAddress": "Bordeaux",
+            "arrivalAddress": "Nantes",
+            "departureLat": 44.8378,
+            "departureLon": -0.5792,
+            "arrivalLat": 47.2184,
+            "arrivalLon": -1.5536,
+            "departureTime": datetime(2024, 6, 15, 8, 0),
+            "arrivalTime": datetime(2024, 6, 15, 12, 0),
+        }
         make_passenger(db_session, different_payload)
 
         response = handle_match(journey_id=companion.id, role=JourneyRole.COMPANION, db=db_session)
@@ -123,9 +134,19 @@ class TestHandleMatchPassenger:
         assert response.found_journey_ids == []
         assert "Found and saved 0 match(es)" in response.message
 
-    def test_passenger_no_address_match(self, db_session, sample_companion_payload, sample_passenger_payload):
-        """A passenger and a companion with different addresses → 0 matches."""
-        different_payload = {**sample_companion_payload, "departureAddress": "Bordeaux", "arrivalAddress": "Nantes"}
+    def test_no_match_when_criteria_differ(self, db_session, sample_companion_payload, sample_passenger_payload):
+        """A passenger and a companion with different addresses, coords AND times → 0 matches."""
+        different_payload = {
+            **sample_companion_payload,
+            "departureAddress": "Bordeaux",
+            "arrivalAddress": "Nantes",
+            "departureLat": 44.8378,
+            "departureLon": -0.5792,
+            "arrivalLat": 47.2184,
+            "arrivalLon": -1.5536,
+            "departureTime": datetime(2024, 6, 15, 8, 0),
+            "arrivalTime": datetime(2024, 6, 15, 12, 0),
+        }
         make_companion(db_session, different_payload)
         passenger = make_passenger(db_session, sample_passenger_payload)
 

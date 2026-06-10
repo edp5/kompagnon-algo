@@ -26,14 +26,26 @@ def run_algorithm(db_session: Optional[Session] = None):
             {
                 "id": c.id,
                 "departureAddress": c.departureAddress,
-                "arrivalAddress": c.arrivalAddress
+                "arrivalAddress": c.arrivalAddress,
+                "departureLat": float(c.departureLat),
+                "departureLon": float(c.departureLon),
+                "arrivalLat": float(c.arrivalLat),
+                "arrivalLon": float(c.arrivalLon),
+                "departureTime": c.departureTime,
+                "arrivalTime": c.arrivalTime,
             } for c in companions_db
         ]
         passengers = [
             {
                 "id": p.id,
                 "departureAddress": p.departureAddress,
-                "arrivalAddress": p.arrivalAddress
+                "arrivalAddress": p.arrivalAddress,
+                "departureLat": float(p.departureLat),
+                "departureLon": float(p.departureLon),
+                "arrivalLat": float(p.arrivalLat),
+                "arrivalLon": float(p.arrivalLon),
+                "departureTime": p.departureTime,
+                "arrivalTime": p.arrivalTime,
             } for p in passengers_db
         ]
 
