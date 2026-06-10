@@ -5,7 +5,7 @@ description = "Kompagnon Algorithm"
 authors = [
     { name = "lgadrien" }
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = []
 
 [build-system]
