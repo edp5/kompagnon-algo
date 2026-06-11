@@ -1,5 +1,5 @@
 # Libraries selected for the project
-pandas == 3.0.2           # Used for data manipulation and cleaning
+pandas == 3.0.3           # Used for data manipulation and cleaning
 scikit-learn == 1.8.0     # Used for machine learning algorithms
 numpy == 2.4.4            # Used for numerical operations
 pytest == 9.0.3           # Used for testing
