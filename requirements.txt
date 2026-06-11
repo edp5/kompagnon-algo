@@ -1,6 +1,6 @@
 # Libraries selected for the project
 pandas == 3.0.3           # Used for data manipulation and cleaning
-scikit-learn == 1.8.0     # Used for machine learning algorithms
+scikit-learn == 1.9.0     # Used for machine learning algorithms
 numpy == 2.4.6            # Used for numerical operations
 pytest == 9.0.3           # Used for testing
 SQLAlchemy == 2.0.50      # Used for database operations
