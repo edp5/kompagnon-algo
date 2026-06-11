@@ -18,7 +18,7 @@ build-backend = "setuptools.build_meta"
 # =========================
 
 [tool.semantic_release]
-branch = "use-pyproject-release-system"
+branch = "main"
 
 commit_parser = "conventional"
 
@@ -39,8 +39,8 @@ upload_to_release = true
 # BRANCH RULES (IMPORTANT)
 # =========================
 
-[tool.semantic_release.branches.use-pyproject-release-system]
-match = "use-pyproject-release-system"
+[tool.semantic_release.branches.main]
+match = "main"
 
 
 # =========================
