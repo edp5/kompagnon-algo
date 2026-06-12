@@ -1,6 +1,6 @@
 [project]
 name = "kompagnon-algo"
-version = "1.1.0"
+version = "1.2.0"
 description = "Kompagnon Algorithm"
 authors = [
     { name = "lgadrien" }
