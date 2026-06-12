@@ -45,7 +45,8 @@ class TestHandleMatchCompanion:
         assert row is not None
         assert row.companionJourneyId == companion.id
         assert row.passengerJourneyId == passenger.id
-        assert row.status == "WAITING"
+        assert row.companionStatus == "waiting"
+        assert row.passengerStatus == "waiting"
 
     def test_companion_no_candidates(self, db_session, sample_companion_payload):
         """A companion with no passengers → 0 matches."""
@@ -92,7 +93,8 @@ class TestHandleMatchCompanion:
         fj = FoundJourney(
             companionJourneyId=companion1.id,
             passengerJourneyId=passenger.id,
-            status="WAITING",
+            companionStatus="waiting",
+            passengerStatus="waiting",
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
@@ -170,7 +172,8 @@ class TestHandleMatchPassenger:
         fj = FoundJourney(
             companionJourneyId=companion.id,
             passengerJourneyId=passenger1.id,
-            status="WAITING",
+            companionStatus="waiting",
+            passengerStatus="waiting",
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )

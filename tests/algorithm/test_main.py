@@ -47,7 +47,8 @@ def test_run_algorithm_with_db(db_session, caplog):
     assert len(found_journeys) == 1
     assert found_journeys[0].companionJourneyId == companion.id
     assert found_journeys[0].passengerJourneyId == passenger.id
-    assert found_journeys[0].status == "WAITING"
+    assert found_journeys[0].companionStatus == "waiting"
+    assert found_journeys[0].passengerStatus == "waiting"
     
     # Verify logs
     assert "Starting Kompagnon matching algorithm (PROD mode)..." in caplog.text

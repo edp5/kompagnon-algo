@@ -31,7 +31,8 @@ def test_match_companion_success(client, db_session, sample_companion_payload, s
     assert match_in_db is not None
     assert match_in_db.companionJourneyId == companion.id
     assert match_in_db.passengerJourneyId == passenger.id
-    assert match_in_db.status == "WAITING"
+    assert match_in_db.companionStatus == "waiting"
+    assert match_in_db.passengerStatus == "waiting"
 
 def test_match_passenger_success(client, db_session, sample_companion_payload, sample_passenger_payload):
     # 1. Insert a companion journey
@@ -114,7 +115,8 @@ def test_match_returns_only_ids_created_by_current_call(client, db_session, samp
     pre_existing = FoundJourney(
         companionJourneyId=pre_companion.id,
         passengerJourneyId=pre_passenger.id,
-        status="WAITING",
+        companionStatus="waiting",
+        passengerStatus="waiting",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -214,7 +216,8 @@ def test_match_mixed_batch_new_duplicate_new(db_session, sample_companion_payloa
     pre_b = FoundJourney(
         companionJourneyId=c_b.id,
         passengerJourneyId=p_b.id,
-        status="WAITING",
+        companionStatus="waiting",
+        passengerStatus="waiting",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
