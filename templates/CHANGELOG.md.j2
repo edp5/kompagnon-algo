@@ -1,7 +1,7 @@
 # Changelog
 
 {% for release in ctx.history.released %}
-## {{ release.version.as_tag() }} ({{ release.tagged_date.strftime("%Y-%m-%d") }})
+## {{ release.tag }} ({{ release.tagged_date.strftime("%Y-%m-%d") }})
 
 {%- set sections = {
   "feat": [],
