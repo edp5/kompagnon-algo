@@ -42,7 +42,8 @@ class FoundJourney(Base):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     companionJourneyId = sa.Column(sa.Integer, sa.ForeignKey('companion_journeys.id'), nullable=False)
     passengerJourneyId = sa.Column(sa.Integer, sa.ForeignKey('passenger_journeys.id'), nullable=False)
-    status = sa.Column(sa.String, nullable=False, default="WAITING")
+    companionStatus = sa.Column(sa.String(255), nullable=False, default="waiting")
+    passengerStatus = sa.Column(sa.String(255), nullable=False, default="waiting")
     created_at = sa.Column(sa.DateTime)
     updated_at = sa.Column(sa.DateTime)
 

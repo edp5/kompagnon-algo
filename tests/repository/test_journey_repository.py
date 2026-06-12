@@ -34,7 +34,8 @@ def make_found_journey(db_session, companion_id: int, passenger_id: int) -> Foun
     fj = FoundJourney(
         companionJourneyId=companion_id,
         passengerJourneyId=passenger_id,
-        status="WAITING",
+        companionStatus="waiting",
+        passengerStatus="waiting",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -169,7 +170,8 @@ class TestSaveMatches:
         assert row is not None
         assert row.companionJourneyId == companion.id
         assert row.passengerJourneyId == passenger.id
-        assert row.status == "WAITING"
+        assert row.companionStatus == "waiting"
+        assert row.passengerStatus == "waiting"
 
     def test_returns_empty_list_for_empty_batch(self, db_session):
         created_ids = save_matches([], db_session)
