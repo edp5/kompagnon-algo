@@ -2,7 +2,7 @@
 pandas == 3.0.3           # Used for data manipulation and cleaning
 scikit-learn == 1.9.0     # Used for machine learning algorithms
 numpy == 2.4.6            # Used for numerical operations
-pytest == 9.1.0           # Used for testing
+pytest == 9.1.1           # Used for testing
 SQLAlchemy == 2.0.51      # Used for database operations
 psycopg2-binary >= 2.9.12 # Used as Postgres driver for SQLAlchemy
 fastapi == 0.137.2        # Used for API to exchange data with the main api
