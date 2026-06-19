@@ -3,34 +3,7 @@
 {% for version, release in ctx.history.released.items() %}
 ## {{ version.as_tag() }} ({{ release.tagged_date.strftime("%Y-%m-%d") }})
 
-{%- set sections = {
-  "feat": [],
-  "fix": [],
-  "perf": [],
-  "refactor": [],
-  "docs": [],
-  "revert": [],
-  "ci": [],
-  "build": [],
-  "test": [],
-  "style": [],
-  "chore": []
-} %}
-
-{# -------------------------
-   Group commits by type
--------------------------- #}
-{%- for type_, commits in release.elements.items() %}
-  {%- if type_ in sections %}
-    {%- for commit in commits %}
-      {%- set _ = sections[type_].append(commit) %}
-    {%- endfor %}
-  {%- endif %}
-{%- endfor %}
-
-{# -------------------------
-   Breaking changes
--------------------------- #}
+{# --- Breaking Changes --- #}
 {%- set breaking = [] %}
 {%- for type_, commits in release.elements.items() %}
   {%- for commit in commits %}
@@ -40,72 +13,60 @@
   {%- endfor %}
 {%- endfor %}
 
-{% if breaking %}
+{%- if breaking %}
 ### 💥 Breaking Changes
 {%- for commit in breaking %}
-{%- for desc in commit.breaking_descriptions %}
+  {%- for desc in commit.breaking_descriptions %}
 - {{ desc | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.feat %}
-### 🚀 Features
-{%- for commit in sections.feat %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.fix %}
-### 🐛 Bug Fixes
-{%- for commit in sections.fix %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.perf %}
-### ⚡ Performance Improvements
-{%- for commit in sections.perf %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.refactor %}
-### 🏗️ Refactoring
-{%- for commit in sections.refactor %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.docs %}
-### 📚 Documentation
-{%- for commit in sections.docs %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.revert %}
-### ⏪ Reverts
-{%- for commit in sections.revert %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
-{%- endfor %}
-
-{% endif %}
-
-{%- if sections.chore or sections.ci or sections.build or sections.test or sections.style %}
-### 🧰 Maintenance
-{%- for type in ["chore", "ci", "build", "test", "style"] %}
-  {%- for commit in sections[type] %}
-- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
   {%- endfor %}
 {%- endfor %}
 
 {% endif %}
 
+{# --- Features --- #}
+{%- if "feat" in release.elements %}
+### 🚀 Features
+{%- for commit in release.elements["feat"] %}
+- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
+{%- endfor %}
+
+{% endif %}
+
+{# --- Bug Fixes --- #}
+{%- if "fix" in release.elements %}
+### 🐛 Bug Fixes
+{%- for commit in release.elements["fix"] %}
+- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
+{%- endfor %}
+
+{% endif %}
+
+{# --- Performance & Refactor & Docs --- #}
+{%- for type_key, title in [("perf", "⚡ Performance Improvements"), ("refactor", "🏗️ Refactoring"), ("docs", "📚 Documentation"), ("revert", "⏪ Reverts")] %}
+{%- if type_key in release.elements %}
+### {{ title }}
+{%- for commit in release.elements[type_key] %}
+- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
+{%- endfor %}
+
+{% endif %}
+{%- endfor %}
+
+{# --- Maintenance --- #}
+{%- set maintenance_commits = [] %}
+{%- for type_key in ["chore", "ci", "build", "test", "style"] %}
+  {%- if type_key in release.elements %}
+    {%- for commit in release.elements[type_key] %}
+      {%- set _ = maintenance_commits.append(commit) %}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}
+
+{%- if maintenance_commits %}
+### 🧰 Maintenance
+{%- for commit in maintenance_commits %}
+- {{ (commit.descriptions[0] if commit.descriptions else commit.message) | capitalize }} (`{{ commit.short_hash }}`)
+{%- endfor %}
+
+{% endif %}
 {% endfor %}
