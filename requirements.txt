@@ -5,7 +5,7 @@ numpy == 2.4.6            # Used for numerical operations
 pytest == 9.1.1           # Used for testing
 SQLAlchemy == 2.0.51      # Used for database operations
 psycopg2-binary >= 2.9.12 # Used as Postgres driver for SQLAlchemy
-fastapi == 0.138.1        # Used for API to exchange data with the main api
+fastapi == 0.138.2        # Used for API to exchange data with the main api
 uvicorn == 0.49.0         # Used as ASGI server to run FastAPI
 python-dotenv == 1.2.2    # Used to load environment variables from .env
 httpx == 0.28.1           # Used for testing API endpoints
