@@ -99,7 +99,7 @@ class TestRunMatchAndNotify:
         passenger_id = passenger.id
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=companion_id, role=JourneyRole.COMPANION)
 
         row = db_session.query(FoundJourney).filter(
@@ -123,7 +123,7 @@ class TestRunMatchAndNotify:
         passenger = make_passenger(db_session, sample_passenger_payload)
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=passenger.id, role=JourneyRole.PASSENGER)
 
         row = db_session.query(FoundJourney).first()
@@ -135,7 +135,7 @@ class TestRunMatchAndNotify:
         companion = make_companion(db_session, sample_companion_payload)
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=companion.id, role=JourneyRole.COMPANION)
 
         assert db_session.query(FoundJourney).count() == 0
@@ -158,7 +158,7 @@ class TestRunMatchAndNotify:
         make_passenger(db_session, different_payload)
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=companion.id, role=JourneyRole.COMPANION)
 
         assert db_session.query(FoundJourney).count() == 0
@@ -193,7 +193,7 @@ class TestRunMatchAndNotify:
         db_session.commit()
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=companion2.id, role=JourneyRole.COMPANION)
 
         # Only the pre-existing FoundJourney must be there; no new one
@@ -220,7 +220,7 @@ class TestRunMatchAndNotify:
         db_session.commit()
 
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-             patch("src.controller.match_controller.notify_companion_api") as mock_notify:
+             patch("src.controller.match_controller.notify_match_result") as mock_notify:
             run_match_and_notify(journey_id=passenger2.id, role=JourneyRole.PASSENGER)
 
         assert db_session.query(FoundJourney).count() == 1

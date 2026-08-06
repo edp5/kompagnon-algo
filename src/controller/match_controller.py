@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.api.schema import JourneyRole, MatchResponse
 from src.algorithm.matcher import find_matches
 from src.db.session import SessionLocal
-from src.notifier.companion_notifier import notify_companion_api
+from src.notifier.match_notifier import notify_match_result
 from src.repository.journey_repository import (
     get_companion_by_id,
     get_passenger_by_id,
@@ -76,7 +76,7 @@ def run_match_and_notify(journey_id: int, role: JourneyRole) -> None:
         )
 
         if found_journey_ids:
-            notify_companion_api(
+            notify_match_result(
                 found_journey_ids=found_journey_ids,
                 journey_id=journey_id,
                 role=role.value,
