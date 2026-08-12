@@ -76,11 +76,7 @@ def run_match_and_notify(journey_id: int, role: JourneyRole) -> None:
         )
 
         if found_journey_ids:
-            notify_match_result(
-                found_journey_ids=found_journey_ids,
-                journey_id=journey_id,
-                role=role.value,
-            )
+            notify_match_result(found_journey_ids=found_journey_ids)
 
     except Exception as e:
         logger.error(
