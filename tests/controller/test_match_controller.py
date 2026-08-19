@@ -166,12 +166,22 @@ class TestRunMatchAndNotify:
 
     def test_journey_not_found_does_not_raise(self, db_session):
         """
-        If the journey is not found in the background task, the error is caught
+        If the companion journey is not found in the background task, the error is caught
         and does not propagate (fail gracefully in background context).
         """
         with patch("src.controller.match_controller.SessionLocal", return_value=db_session):
             # Should not raise – error is caught internally
             run_match_and_notify(journey_id=9999, role=JourneyRole.COMPANION)
+
+    def test_passenger_journey_not_found_does_not_raise(self, db_session):
+        """
+        If the passenger journey is not found in the background task, the error is caught
+        and does not propagate (fail gracefully in background context).
+        Covers the `raise ValueError` on line 56 of match_controller.py.
+        """
+        with patch("src.controller.match_controller.SessionLocal", return_value=db_session):
+            # Should not raise – error is caught internally
+            run_match_and_notify(journey_id=9999, role=JourneyRole.PASSENGER)
 
     def test_companion_already_matched_passenger_excluded(self, db_session, sample_companion_payload, sample_passenger_payload):
         """Already matched passengers are excluded from candidates."""
