@@ -37,7 +37,7 @@ def _run_match_inline(journey_id, role, db_session):
     from src.controller.match_controller import run_match_and_notify
     role_enum = JourneyRole(role) if isinstance(role, str) else role
     with patch("src.controller.match_controller.SessionLocal", return_value=db_session), \
-         patch("src.controller.match_controller.notify_companion_api"):
+         patch("src.controller.match_controller.notify_match_result"):
         run_match_and_notify(journey_id=journey_id, role=role_enum)
 
 
