@@ -4,26 +4,7 @@ from datetime import datetime
 from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
 from src.api.schema import JourneyRole
 from src.controller.match_controller import handle_match, run_match_and_notify
-
-
-# ---------------------------------------------------------------------------
-# NonClosingSession: prevents handle_match's finally db.close() from closing
-# the shared test db_session.
-# ---------------------------------------------------------------------------
-
-class NonClosingSession:
-    """Proxy that delegates all attribute access to the wrapped session
-    except for close(), which is silently ignored."""
-
-    def __init__(self, session):
-        self._session = session
-
-    def close(self):
-        pass  # no-op — test transaction must stay open
-
-    def __getattr__(self, name):
-        return getattr(self._session, name)
-
+from tests.conftest import NonClosingSession
 
 # ---------------------------------------------------------------------------
 # Helpers

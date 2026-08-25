@@ -33,11 +33,11 @@ def _journey_to_dict(j) -> dict:
 def run_match_and_notify(journey_id: int, role: JourneyRole) -> None:
     """
     Background task: run the matching algorithm for the given journey and, if
-    matches are found, notify the Companion API via HTTP callback.
+    matches are found, notify the Kompagnon API via HTTP callback.
 
     Opens its own DB session so it can run independently of the request lifecycle.
-    Raises ValueError if the journey is not found (will be logged by FastAPI's
-    background task machinery).
+    All exceptions are caught, logged (with full traceback), and swallowed so the
+    background task never crashes the worker process.
     """
     db: Session = SessionLocal()
     try:
@@ -78,9 +78,9 @@ def run_match_and_notify(journey_id: int, role: JourneyRole) -> None:
         if found_journey_ids:
             notify_match_result(found_journey_ids=found_journey_ids)
 
-    except Exception as e:
-        logger.error(
-            f"[background] Error during matching for {role} journey ID {journey_id}: {e}"
+    except Exception:
+        logger.exception(
+            f"[background] Error during matching for {role} journey ID {journey_id}"
         )
         db.rollback()
     finally:
@@ -95,12 +95,10 @@ def handle_match(journey_id: int, role: JourneyRole) -> MatchResponse:
     db: Session = SessionLocal()
     try:
         if role == JourneyRole.COMPANION:
-            target = get_companion_by_id(db, journey_id)
-            if not target:
+            if not get_companion_by_id(db, journey_id):
                 raise ValueError(f"Companion journey with ID {journey_id} not found")
         else:
-            target = get_passenger_by_id(db, journey_id)
-            if not target:
+            if not get_passenger_by_id(db, journey_id):
                 raise ValueError(f"Passenger journey with ID {journey_id} not found")
     finally:
         db.close()

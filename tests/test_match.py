@@ -2,27 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 from src.db.models import CompanionJourney, PassengerJourney, FoundJourney
-
-
-# ---------------------------------------------------------------------------
-# NonClosingSession: wraps the test db_session so that db.close() called by
-# handle_match's finally block is a no-op, keeping the test transaction alive.
-# ---------------------------------------------------------------------------
-
-class NonClosingSession:
-    """Proxy that delegates all attribute access to the wrapped session
-    except for close(), which is silently ignored."""
-
-    def __init__(self, session):
-        self._session = session
-
-    def close(self):
-        pass  # no-op — test transaction must stay open
-
-    def __getattr__(self, name):
-        return getattr(self._session, name)
-
-
+from tests.conftest import NonClosingSession
 # ---------------------------------------------------------------------------
 # Helper: run the background matching logic inline using the test db_session,
 # so we can inspect the DB state within the same transaction.
