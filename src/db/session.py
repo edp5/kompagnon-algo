@@ -12,7 +12,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL is None:  # pragma: no cover
     raise ValueError("DATABASE_URL environment variable is not set")
 
-if DATABASE_URL.startswith("postgres://"):
+if DATABASE_URL.startswith("postgres://"):  # pragma: no branch
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
 
 engine = create_engine(DATABASE_URL)

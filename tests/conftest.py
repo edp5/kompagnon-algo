@@ -15,6 +15,24 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
+class NonClosingSession:
+    """Proxy that delegates all attribute access to the wrapped session
+    except for close(), which is silently ignored.
+
+    Used in tests to prevent handle_match's finally db.close() from closing
+    the shared test db_session.
+    """
+
+    def __init__(self, session):
+        self._session = session
+
+    def close(self):
+        pass  # no-op — test transaction must stay open
+
+    def __getattr__(self, name):
+        return getattr(self._session, name)
+
 @pytest.fixture(scope="session")
 def db_engine():
     """Create the database and tables."""
