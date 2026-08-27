@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 # Earth's mean radius in kilometres (WGS-84).
 _EARTH_RADIUS_KM = 6_371.0
 
+# Approximate km per degree of latitude (constant everywhere on Earth).
+_KM_PER_DEG_LAT = 111.0
+
 
 # ---------------------------------------------------------------------------
 # Low-level helpers
@@ -46,6 +49,43 @@ def haversine_distance(
     dlon = lon2 - lon1
     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
     return 2 * _EARTH_RADIUS_KM * math.asin(math.sqrt(a))
+
+
+def _bounding_box_filter(
+    target: Dict[str, Any],
+    candidates: List[Dict[str, Any]],
+    max_km: float,
+) -> List[Dict[str, Any]]:
+    """
+    Return only the candidates whose **departure** point falls inside a square
+    bounding box of side ``2 × max_km`` centred on the target departure point.
+
+    This is a cheap O(n) pre-filter that uses simple degree arithmetic instead
+    of Haversine, eliminating obviously distant candidates before the expensive
+    scoring loop. A bounding box is always a superset of the Haversine circle,
+    so no valid match is ever discarded here.
+
+    Formula::
+
+        Δlat = max_km / 111.0
+        Δlon = max_km / (111.0 × cos(lat_rad))
+    """
+    t_lat = float(target["departureLat"])
+    t_lon = float(target["departureLon"])
+
+    delta_lat = max_km / _KM_PER_DEG_LAT
+    # Guard against equatorial cos(lat) = 0; clamp to small positive value.
+    cos_lat = math.cos(math.radians(t_lat)) or 1e-9
+    delta_lon = max_km / (_KM_PER_DEG_LAT * cos_lat)
+
+    lat_min, lat_max = t_lat - delta_lat, t_lat + delta_lat
+    lon_min, lon_max = t_lon - delta_lon, t_lon + delta_lon
+
+    return [
+        c for c in candidates
+        if lat_min <= float(c["departureLat"]) <= lat_max
+        and lon_min <= float(c["departureLon"]) <= lon_max
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -179,6 +219,10 @@ def find_matches(
         departureLat, departureLon, arrivalLat, arrivalLon,
         departureTime
 
+    A bounding box pre-filter (cheap O(n) degree arithmetic) is applied for
+    each passenger before the Haversine scoring loop, discarding companions
+    that are obviously too far without computing any trigonometry.
+
     Returns a list of dicts with keys:
         ``companion_journey_id``, ``passenger_journey_id``, ``score``
     sorted by descending score (best matches first).
@@ -192,7 +236,15 @@ def find_matches(
     )
 
     for passenger in passengers:
-        for companion in companions:
+        # Pre-filter: keep only companions within the bounding box around
+        # this passenger's departure point — no Haversine needed here.
+        nearby_companions = _bounding_box_filter(passenger, companions, MAX_DISTANCE_KM)
+        logger.debug(
+            f"Passenger {passenger['id']}: bounding-box pre-filter kept "
+            f"{len(nearby_companions)}/{len(companions)} companion(s)."
+        )
+
+        for companion in nearby_companions:
             score = compute_match_score(companion, passenger)
             if score >= MIN_MATCH_SCORE:
                 logger.info(

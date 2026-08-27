@@ -11,6 +11,7 @@ Tests cover:
 """
 import pytest
 from datetime import datetime, timezone, timedelta
+from typing import Dict, Any
 from unittest.mock import patch
 
 @pytest.fixture(autouse=True)
@@ -30,6 +31,7 @@ from src.algorithm.matcher import (
     _time_score,
     _address_score,
     compute_match_score,
+    _bounding_box_filter,
 )
 
 
@@ -292,3 +294,67 @@ class TestFindMatches:
         # But with default threshold it matches
         matches = find_matches([c], [p])
         assert len(matches) == 1
+
+
+# ---------------------------------------------------------------------------
+# Bounding box pre-filter
+# ---------------------------------------------------------------------------
+
+class TestBoundingBoxFilter:
+    """Tests for the O(n) bounding-box geographic pre-filter."""
+
+    _PARIS = {"departureLat": 48.8566, "departureLon": 2.3522}
+
+    def _make_candidate(self, lat: float, lon: float) -> Dict[str, Any]:
+        return {
+            "id": 99,
+            "departureLat": lat,
+            "departureLon": lon,
+            "arrivalLat": lat,
+            "arrivalLon": lon,
+            "departureAddress": "",
+            "arrivalAddress": "",
+            "departureTime": _BASE_TIME,
+        }
+
+    def test_same_location_passes(self):
+        """A candidate at the exact same point must always pass."""
+        candidate = self._make_candidate(48.8566, 2.3522)
+        result = _bounding_box_filter(self._PARIS.copy(), [candidate], max_km=5.0)
+        assert len(result) == 1
+
+    def test_nearby_candidate_passes(self):
+        """A candidate ~1 km away must pass a 5 km bounding box."""
+        # ~1 km north of Paris (0.009° lat ≈ 1 km)
+        candidate = self._make_candidate(48.8656, 2.3522)
+        result = _bounding_box_filter(self._PARIS.copy(), [candidate], max_km=5.0)
+        assert len(result) == 1
+
+    def test_distant_candidate_eliminated(self):
+        """A candidate in Lyon (~392 km away) must be eliminated by a 5 km box."""
+        candidate = self._make_candidate(45.7640, 4.8357)  # Lyon
+        result = _bounding_box_filter(self._PARIS.copy(), [candidate], max_km=5.0)
+        assert len(result) == 0
+
+    def test_box_is_superset_of_haversine_circle(self):
+        """
+        A point inside the bounding box but potentially on the diagonal corner
+        must NOT be eliminated — the box is always a superset of the circle.
+        """
+        # 0.032° lat ≈ 3.5 km, 0.032° lon ≈ ~2.3 km at Paris lat → both within 5 km box
+        candidate = self._make_candidate(48.8566 + 0.032, 2.3522 + 0.032)
+        result = _bounding_box_filter(self._PARIS.copy(), [candidate], max_km=5.0)
+        assert len(result) == 1
+
+    def test_empty_candidates_returns_empty(self):
+        """Empty input → empty output."""
+        result = _bounding_box_filter(self._PARIS.copy(), [], max_km=5.0)
+        assert result == []
+
+    def test_filters_multiple_candidates(self):
+        """Mix of nearby and distant candidates — only nearby ones survive."""
+        nearby = self._make_candidate(48.860, 2.355)   # ~0.5 km from Paris
+        far = self._make_candidate(43.2965, 5.3698)    # Marseille
+        result = _bounding_box_filter(self._PARIS.copy(), [nearby, far], max_km=5.0)
+        assert len(result) == 1
+        assert result[0]["departureLat"] == 48.860
