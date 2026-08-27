@@ -18,9 +18,16 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python Semantic Release
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "python-semantic-release==10.6.1" "GitPython<3.1.60"
+
       - name: Python Semantic Release
         env:
             GITHUB_TOKEN: ${{ secrets.SERVICE_TOKEN }}
-        uses: python-semantic-release/python-semantic-release@v10.6.1
-        with:
-          github_token: ${{ secrets.SERVICE_TOKEN }}
+        run: semantic-release version
