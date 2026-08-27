@@ -1,6 +1,11 @@
-# This file permit to modelized the DB (schema).
-# All DateTime columns use timezone=True (TIMESTAMP WITH TIME ZONE in PostgreSQL)
-# to ensure UTC-aware storage and prevent timezone-comparison bugs.
+# This file permits to model the DB schema.
+# All DateTime columns use timezone=True, which maps to TIMESTAMP WITH TIME ZONE
+# in PostgreSQL. PostgreSQL normalises stored values to UTC internally, making
+# cross-timezone comparisons (e.g. in _time_score()) safe and unambiguous.
+# NOTE: callers are responsible for providing timezone-aware datetime values.
+# NOTE: existing PostgreSQL columns (timestamp without time zone) must be
+#       migrated to timestamptz in production — this ORM change alone does not
+#       alter the live schema.
 import sqlalchemy as sa
 from sqlalchemy.orm import declarative_base
 
