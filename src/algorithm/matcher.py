@@ -51,40 +51,82 @@ def haversine_distance(
     return 2 * _EARTH_RADIUS_KM * math.asin(math.sqrt(a))
 
 
+def _lon_in_range(lon: float, lon_min: float, lon_max: float) -> bool:
+    """
+    Return True if *lon* falls within [lon_min, lon_max], handling antimeridian
+    wrap-around (±180°).
+
+    When the bounding box crosses the dateline (lon_max > 180 or lon_min < -180)
+    the check is split into two standard ranges so that, for example, 179.9° and
+    -179.9° are correctly treated as adjacent.
+    """
+    if lon_min >= -180 and lon_max <= 180:
+        return lon_min <= lon <= lon_max
+    # Box crosses the antimeridian — normalise and check both halves.
+    lon_min_w = ((lon_min + 180) % 360) - 180
+    lon_max_w = ((lon_max + 180) % 360) - 180
+    if lon_min_w <= lon_max_w:
+        return lon_min_w <= lon <= lon_max_w
+    return lon >= lon_min_w or lon <= lon_max_w
+
+
 def _bounding_box_filter(
     target: Dict[str, Any],
     candidates: List[Dict[str, Any]],
     max_km: float,
 ) -> List[Dict[str, Any]]:
     """
-    Return only the candidates whose **departure** point falls inside a square
-    bounding box of side ``2 × max_km`` centred on the target departure point.
+    Return only the candidates whose **departure and arrival** points both fall
+    inside a square bounding box of side ``2 × max_km`` centred on the
+    corresponding target points.
 
     This is a cheap O(n) pre-filter that uses simple degree arithmetic instead
     of Haversine, eliminating obviously distant candidates before the expensive
     scoring loop. A bounding box is always a superset of the Haversine circle,
     so no valid match is ever discarded here.
 
+    Antimeridian (±180° longitude) wrap-around is handled correctly via
+    :func:`_lon_in_range`.
+
     Formula::
 
         Δlat = max_km / 111.0
         Δlon = max_km / (111.0 × cos(lat_rad))
+
+    .. note::
+        ``cos(lat)`` approaches 0 near the **poles** (not the equator);
+        the clamp to ``1e-9`` prevents division-by-zero there.
     """
-    t_lat = float(target["departureLat"])
-    t_lon = float(target["departureLon"])
+    # --- Departure bounding box ---
+    t_dep_lat = float(target["departureLat"])
+    t_dep_lon = float(target["departureLon"])
+    delta_dep_lat = max_km / _KM_PER_DEG_LAT
+    cos_dep = math.cos(math.radians(t_dep_lat)) or 1e-9
+    delta_dep_lon = max_km / (_KM_PER_DEG_LAT * cos_dep)
+    dep_lat_min = t_dep_lat - delta_dep_lat
+    dep_lat_max = t_dep_lat + delta_dep_lat
+    dep_lon_min = t_dep_lon - delta_dep_lon
+    dep_lon_max = t_dep_lon + delta_dep_lon
 
-    delta_lat = max_km / _KM_PER_DEG_LAT
-    # Guard against equatorial cos(lat) = 0; clamp to small positive value.
-    cos_lat = math.cos(math.radians(t_lat)) or 1e-9
-    delta_lon = max_km / (_KM_PER_DEG_LAT * cos_lat)
-
-    lat_min, lat_max = t_lat - delta_lat, t_lat + delta_lat
-    lon_min, lon_max = t_lon - delta_lon, t_lon + delta_lon
+    # --- Arrival bounding box ---
+    t_arr_lat = float(target["arrivalLat"])
+    t_arr_lon = float(target["arrivalLon"])
+    delta_arr_lat = max_km / _KM_PER_DEG_LAT
+    cos_arr = math.cos(math.radians(t_arr_lat)) or 1e-9
+    delta_arr_lon = max_km / (_KM_PER_DEG_LAT * cos_arr)
+    arr_lat_min = t_arr_lat - delta_arr_lat
+    arr_lat_max = t_arr_lat + delta_arr_lat
+    arr_lon_min = t_arr_lon - delta_arr_lon
+    arr_lon_max = t_arr_lon + delta_arr_lon
 
     return [
         c for c in candidates
-        if lat_min <= float(c["departureLat"]) <= lat_max
-        and lon_min <= float(c["departureLon"]) <= lon_max
+        if (
+            dep_lat_min <= float(c["departureLat"]) <= dep_lat_max
+            and _lon_in_range(float(c["departureLon"]), dep_lon_min, dep_lon_max)
+            and arr_lat_min <= float(c["arrivalLat"]) <= arr_lat_max
+            and _lon_in_range(float(c["arrivalLon"]), arr_lon_min, arr_lon_max)
+        )
     ]
 
 
@@ -240,8 +282,8 @@ def find_matches(
         # this passenger's departure point — no Haversine needed here.
         nearby_companions = _bounding_box_filter(passenger, companions, MAX_DISTANCE_KM)
         logger.debug(
-            f"Passenger {passenger['id']}: bounding-box pre-filter kept "
-            f"{len(nearby_companions)}/{len(companions)} companion(s)."
+            "Passenger %s: bounding-box pre-filter kept %d/%d companion(s).",
+            passenger["id"], len(nearby_companions), len(companions),
         )
 
         for companion in nearby_companions:
