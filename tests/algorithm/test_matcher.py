@@ -391,3 +391,18 @@ class TestBoundingBoxFilter:
         result = _bounding_box_filter(target, [candidate], max_km=5.0)
         # Must NOT be filtered out — they are ~1 km apart despite lon sign difference
         assert len(result) == 1
+
+    def test_antimeridian_wraparound_out_of_bounds_lon(self):
+        """
+        If target longitude is e.g. 182, it wraps around to -178.
+        This hits the lon_min_w <= lon_max_w branch in _lon_in_range.
+        """
+        target = {
+            "departureLat": 0.0, "departureLon": 182.0,
+            "arrivalLat": 0.0, "arrivalLon": 182.0,
+        }
+        candidate = self._make_candidate(lat=0.0, lon=-178.0)
+        result = _bounding_box_filter(target, [candidate], max_km=5.0)
+        assert len(result) == 1
+
+
