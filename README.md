@@ -163,9 +163,9 @@ All parameters can be customized in `.env`:
 | Variable | Type | Default | Description |
 |---|:---:|:---:|---|
 | `PORT` | Integer | `8000` | Port for the Uvicorn server |
-| `DATABASE_URL` | String | `postgres://postgres:@localhost:5432/kompagnon` | PostgreSQL database connection string |
+| `DATABASE_URL` | String | *Required* | PostgreSQL database connection string |
 | `KOMPAGNON_API_URL` | String | `http://localhost:3000/api` | Base URL of the main Kompagnon API |
-| `KOMPAGNON_API_KEY` | String | *empty* | Shared API key sent in `x-api-key` header to authenticate webhook |
+| `KOMPAGNON_API_KEY` | String | *empty* | Shared API key sent in `x-api-key` header to authenticate webhook (skipped if empty) |
 | `MATCH_MAX_DISTANCE_KM` | Float | `5.0` | Maximum radius (km) for geographic proximity |
 | `MATCH_PERFECT_DISTANCE_KM` | Float | `0.5` | Distance threshold (km) yielding a perfect 1.0 geo score |
 | `MATCH_TIME_TOLERANCE_MINUTES` | Integer | `30` | Maximum difference (minutes) in departure timestamps |
