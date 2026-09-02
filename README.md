@@ -10,7 +10,7 @@ This repository contains the **multi-criteria matching algorithm & matching serv
 - [x] OpenAPI / Swagger documentation (`/api/docs` & `/api/redoc`)
 - [x] PostgreSQL database integration with SQLAlchemy models
 - [x] Multi-criteria scoring algorithm (Haversine geographic proximity, departure time difference, address similarity)
-- [x] Spatial pre-filtering with geographic bounding box (`O(1)` pre-filter before `O(N)` Haversine distance loop)
+- [x] Spatial pre-filtering with geographic bounding box (cheap O(N) arithmetic filter to reduce Haversine computations before the Haversine distance loop)
 - [x] Asynchronous journey matching triggered via `POST /api/match`
 - [x] Automated webhook notification callback to the main Kompagnon API (`POST /api/journeys/match`)
 - [x] Batch matching execution mode (`python -m src.algorithm.main`)
