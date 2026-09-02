@@ -106,7 +106,7 @@ sequenceDiagram
     Worker->>DB: Insert new matches into found_journeys
     
     alt Matches found
-        Worker->>MainAPI: POST /api/journeys/match { "foundJourneyIds": [101, 102] } with x-api-key
+        Worker->>MainAPI: POST /api/journeys/match { "data": [101, 102] } with x-api-key
         MainAPI-->>Worker: 200 OK (Triggers user notification emails)
     end
 ```
